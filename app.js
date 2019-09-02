@@ -7,6 +7,7 @@ const path = require('path');
 const uuidv4 = require('uuid/v4');
 const shopHandler = require('./routes/shop');
 const adminHandler = require('./routes/admin');
+const authHandler = require('./routes/auth');
 const app = express();
 
 const MONGODB_URI = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0-lie0b.mongodb.net/${process.env.MONGO_DATABASE}?retryWrites=true&w=majority`;
@@ -41,6 +42,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/auth', authHandler);
 app.use('/shop', shopHandler);
 app.use('/admin', uploadFile, adminHandler);
 app.use((error, req, res, next) => {
