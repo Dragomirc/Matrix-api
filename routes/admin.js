@@ -21,4 +21,22 @@ router.post(
   adminController.postAddProduct
 );
 
+router.put(
+  '/product',
+  [
+    body('title')
+      .trim()
+      .isLength({ min: 5 })
+      .withMessage('Product title must be at least 5 chars long'),
+    body('description')
+      .trim()
+      .isLength({ min: 5 })
+      .withMessage('Product description must be at least 5 chars long'),
+    body('price')
+      .isFloat()
+      .trim()
+  ],
+  adminController.putUpdateProduct
+);
+
 module.exports = router;
