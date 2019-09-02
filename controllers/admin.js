@@ -45,6 +45,7 @@ const clearImage = filePath => {
   );
   fs.unlink(localPath, err => console.log(err));
 };
+
 exports.putUpdateProduct = async (req, res, next) => {
   const errors = validationResult(req);
 
@@ -91,6 +92,25 @@ exports.putUpdateProduct = async (req, res, next) => {
   } catch (err) {
     if (!err.statusCode) {
       err.satusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.deleteProduct = async (req, res, next) => {
+  const { productId } = req.params;
+  try {
+    const product = await Product.findByIdAndRemove(productId);
+    if (!product) {
+      const error = new Error('Product not found.');
+      error.statusCode = 404;
+      return next(error);
+    }
+    res.status(200).json({ message: 'Product successfully deleted.', product });
+    clearImage(product.imageUrl);
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
     }
     next(err);
   }
