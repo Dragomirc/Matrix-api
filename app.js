@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const path = require('path');
 const uuidv4 = require('uuid/v4');
+const cookieParser = require('cookie-parser');
 const shopHandler = require('./routes/shop');
 const adminHandler = require('./routes/admin');
 const authHandler = require('./routes/auth');
@@ -34,13 +35,15 @@ const fileFilter = (req, file, cb) => {
 const uploadFile = multer({ storage, fileFilter }).single('image');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use(cookieParser());
+
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
 });
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use('/auth', authHandler);
 app.use('/shop', shopHandler);

@@ -57,12 +57,24 @@ exports.login = async (req, res, next) => {
       error.statusCode = 401;
       return next(error);
     }
-    const token = await jwt.sign(
+    const accessToken = await jwt.sign(
       { email: user.email, userId: user._id },
-      process.env.SECRET,
-      { expiresIn: '1h' }
+      process.env.SECRET
     );
-    res.status(200).json({ token, userId: user._id });
+    const expiryDate = new Date(Date.now() + 60 * 60 * 1000);
+    console.log('Date now', new Date(Date.now()).toTimeString());
+    const options = {
+      // maxAge: 1000 * 60 * 15,
+      httpOnly: true,
+      expires: expiryDate
+
+      // domain: 'reed.co.uk'
+    };
+
+    res
+      .status(200)
+      .cookie('accessToken', accessToken, options)
+      .json({ userId: user._id });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
