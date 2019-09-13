@@ -1,12 +1,14 @@
 const express = require('express');
 const { body } = require('express-validator/check');
+const { isAuth } = require('../middleware/is-auth');
 const adminController = require('../controllers/admin');
 const router = express.Router();
 
 router.post(
   '/product',
+  isAuth,
   [
-    body('title')
+    (body('title')
       .trim()
       .isLength({ min: 5 })
       .withMessage('Product title must be at least 5 chars long'),
@@ -16,15 +18,16 @@ router.post(
       .withMessage('Product description must be at least 5 chars long'),
     body('price')
       .isFloat()
-      .trim()
+      .trim())
   ],
   adminController.postAddProduct
 );
 
 router.put(
   '/product',
+  isAuth,
   [
-    body('title')
+    (body('title')
       .trim()
       .isLength({ min: 5 })
       .withMessage('Product title must be at least 5 chars long'),
@@ -34,7 +37,7 @@ router.put(
       .withMessage('Product description must be at least 5 chars long'),
     body('price')
       .isFloat()
-      .trim()
+      .trim())
   ],
   adminController.putUpdateProduct
 );

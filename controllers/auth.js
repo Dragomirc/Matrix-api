@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 exports.signup = async (req, res, next) => {
-  console.log(req.body);
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error = new Error('Validation failed.');
@@ -57,28 +56,42 @@ exports.login = async (req, res, next) => {
       error.statusCode = 401;
       return next(error);
     }
-    const accessToken = await jwt.sign(
-      { email: user.email, userId: user._id },
-      process.env.SECRET
-    );
-    const expiryDate = new Date(Date.now() + 60 * 60 * 1000);
-    console.log('Date now', new Date(Date.now()).toTimeString());
-    const options = {
-      // maxAge: 1000 * 60 * 15,
-      httpOnly: true,
-      expires: expiryDate
+    const accessToken = jwt.sign({ userId: user._id }, process.env.SECRET, {
+      expiresIn: 60 * 30
+    });
 
-      // domain: 'reed.co.uk'
+    const options = {
+      // secure: true,
+      httpOnly: true,
+      sameSite: true
     };
 
     res
       .status(200)
       .cookie('accessToken', accessToken, options)
-      .json({ userId: user._id });
+      .json({ userId: user._id, userName: user.name });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
     }
     next(err);
+  }
+};
+
+exports.userDetails = async (req, res, next) => {
+  const { userId } = req;
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      const error = new Error("User doesn't exist.");
+      error.statusCode = 401;
+      next(error);
+    }
+    res.status(200).json({ userId: user._id, userName: user.name });
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
