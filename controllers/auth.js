@@ -104,7 +104,7 @@ exports.postResetPassword = async (req, res, next) => {
     }
     const resetToken = crypto.randomBytes(32).toString('hex');
     user.resetToken = resetToken;
-    user.resetTokenExpiration = Date.now() + 3600 * 1000;
+    user.resetTokenExpiration = Date.now() + 1800 * 1000;
     await user.save();
     trasnport.sendMail({
       to: email,
@@ -112,14 +112,47 @@ exports.postResetPassword = async (req, res, next) => {
       subject: 'Password Reset',
       html: `
       <p>You requested a password reset</p>
+      <p>The below link will expire in 30 minutes.</p>
       <p>Click this <a href="${req.headers.origin}/new-password/${resetToken}">link</a> to set a new password.</p>`
     });
-    res.status(200).json({ messege: 'Pasword reset email sent.' });
+    res.status(200).json({ messege: 'Password reset email sent.' });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;
     }
     next(error);
+  }
+};
+exports.putUpdatePassword = async (req, res, next) => {
+  const { password, resetToken } = req.body;
+
+  try {
+    const user = await User.findOne({
+      resetToken,
+      resetTokenExpiration: { $gt: Date.now() }
+    });
+    if (!user) {
+      const error = new Error("User doesn't exist.");
+      error.statusCode = 404;
+      next(error);
+    }
+    const hash = await bcrypt.hash(password, 12);
+    user.password = hash;
+    user.resetToken = null;
+    user.resetTokenExpiration = null;
+    await user.save();
+    res.status(200).json({ message: 'Password was succesfully updated!' });
+    trasnport.sendMail({
+      to: user.email,
+      from: 'dragomirceban@gmail.com',
+      subject: 'Password reset',
+      html: '<h1>Your password was successfully reset.</h1>'
+    });
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(err);
   }
 };
 
