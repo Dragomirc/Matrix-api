@@ -1,7 +1,16 @@
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const { validationResult } = require('express-validator');
+const nodemailer = require('nodemailer');
+const sendgridTransport = require('nodemailer-sendgrid-transport');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+
+const trasnport = nodemailer.createTransport(
+  sendgridTransport({
+    auth: { api_key: process.env.SENDGRID_API_KEY }
+  })
+);
 
 exports.signup = async (req, res, next) => {
   const errors = validationResult(req);
@@ -23,6 +32,12 @@ exports.signup = async (req, res, next) => {
       password: hash
     });
     await user.save();
+    trasnport.sendMail({
+      to: email,
+      from: `dragomirceban@gmail.com`,
+      subject: 'Signup succeeded!',
+      html: '<h1>You successfully signed up!</h1>'
+    });
     res
       .status(201)
       .json({ message: 'User succesfully created', userId: user._id });
@@ -75,6 +90,36 @@ exports.login = async (req, res, next) => {
       err.statusCode = 500;
     }
     next(err);
+  }
+};
+
+exports.postResetPassword = async (req, res, next) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      const error = new Error("User doesn't exist.");
+      error.statusCode = 401;
+      next(error);
+    }
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    user.resetToken = resetToken;
+    user.resetTokenExpiration = Date.now() + 3600 * 1000;
+    await user.save();
+    trasnport.sendMail({
+      to: email,
+      from: 'dragomirceban@gmail.com',
+      subject: 'Password Reset',
+      html: `
+      <p>You requested a password reset</p>
+      <p>Click this <a href="${req.headers.origin}/new-password/${resetToken}">link</a> to set a new password.</p>`
+    });
+    res.status(200).json({ messege: 'Pasword reset email sent.' });
+  } catch (error) {
+    if (!error.statusCode) {
+      error.statusCode = 500;
+    }
+    next(error);
   }
 };
 

@@ -36,7 +36,7 @@ exports.isAuth = (req, res, next) => {
       sameSite: true
     };
 
-    res.status(200).cookie('accessToken', accessToken, options);
+    res.cookie('accessToken', accessToken, options);
   }
   next();
 };
