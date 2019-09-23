@@ -175,3 +175,13 @@ exports.userDetails = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.logout = (req, res) => {
+  const options = {
+    expiresIn: Date.now()
+  };
+  res
+    .status(200)
+    .cookie('accessToken', '', options)
+    .json({ message: 'Logged out successfully!' });
+};
