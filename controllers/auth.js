@@ -84,7 +84,7 @@ exports.login = async (req, res, next) => {
     res
       .status(200)
       .cookie('accessToken', accessToken, options)
-      .json({ userId: user._id, userName: user.name });
+      .json({ userId: user._id, userName: user.name, admin: user.adminRole });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -165,7 +165,9 @@ exports.userDetails = async (req, res, next) => {
       error.statusCode = 401;
       next(error);
     }
-    res.status(200).json({ userId: user._id, userName: user.name });
+    res
+      .status(200)
+      .json({ userId: user._id, userName: user.name, admin: user.adminRole });
   } catch (error) {
     if (!error.statusCode) {
       error.statusCode = 500;

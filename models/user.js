@@ -16,6 +16,7 @@ const userSchema = new Schema({
   },
   resetToken: String,
   resetTokenExpiration: String,
+  adminRole: { type: Boolean, default: false },
   products: [
     {
       productId: {
