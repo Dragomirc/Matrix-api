@@ -34,16 +34,16 @@ const userSchema = new Schema({
   }
 });
 
-userSchema.methods.addToCart = function(product) {
+userSchema.methods.addToCart = function(productId) {
   const productIndex = this.cart.items.findIndex(
-    _product => _product.productId.toString() === product._id.toString()
+    _product => _product.productId.toString() === productId.toString()
   );
   let quantity = 1;
   const newCart = [...this.cart.items];
   if (productIndex > -1) {
     newCart[productIndex].quantity++;
   } else {
-    newCart.push({ productId: product._id, quantity });
+    newCart.push({ productId, quantity });
   }
   this.cart.items = newCart;
   this.save();

@@ -32,7 +32,7 @@ exports.getProduct = async (req, res, next) => {
 
 exports.postAddToCart = async (req, res, next) => {
   const { userId } = req;
-  const { product } = req.body;
+  const { productId } = req.body;
   try {
     const user = await User.findById(userId);
     if (!user) {
@@ -40,8 +40,12 @@ exports.postAddToCart = async (req, res, next) => {
       error.statusCode = 404;
       next(error);
     }
-    await user.addToCart(product);
-    res.status(200).json({ message: 'Cart successfully updated!' });
+    await user.addToCart(productId);
+    const userWithCartPopulated = await user
+      .populate('cart.items.productId')
+      .execPopulate();
+    const newCart = userWithCartPopulated.cart.items;
+    res.status(200).json({ cart: newCart });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
