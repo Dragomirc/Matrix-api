@@ -1,4 +1,5 @@
 const Product = require('../models/product');
+const User = require('../models/user');
 exports.getProducts = async (req, res, next) => {
   try {
     const products = await Product.find();
@@ -21,6 +22,26 @@ exports.getProduct = async (req, res, next) => {
       next(error);
     }
     res.status(200).json(product);
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
+
+exports.postAddToCart = async (req, res, next) => {
+  const { userId } = req;
+  const { product } = req.body;
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      const error = new Error("User doesn't exist.");
+      error.statusCode = 404;
+      next(error);
+    }
+    await user.addToCart(product);
+    res.status(200).json({ message: 'Cart successfully updated!' });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
