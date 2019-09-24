@@ -60,6 +60,7 @@ exports.login = async (req, res, next) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
+    await user.populate('cart.items.productId').execPopulate();
     if (!user) {
       const error = new Error('The email or password is incorrect.');
       error.statusCode = 401;
@@ -167,6 +168,7 @@ exports.userDetails = async (req, res, next) => {
   const { userId } = req;
   try {
     const user = await User.findById(userId);
+    await user.populate('cart.items.productId').execPopulate();
     if (!user) {
       const error = new Error("User doesn't exist.");
       error.statusCode = 401;
