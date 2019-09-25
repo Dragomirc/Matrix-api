@@ -53,3 +53,26 @@ exports.postAddToCart = async (req, res, next) => {
     next(err);
   }
 };
+exports.patchDeleteCartItem = async (req, res, next) => {
+  const { userId } = req;
+  const { productId } = req.body;
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      const error = new Error("User doesn't exist!");
+      error.statusCode = 404;
+      next(error);
+    }
+    await user.deleteCartItem(productId);
+    const userWithCartPopulated = await user
+      .populate('cart.items.productId')
+      .execPopulate();
+    const newCart = userWithCartPopulated.cart.items;
+    res.status(200).json({ cart: newCart });
+  } catch (err) {
+    if (!err.statusCode) {
+      err.statusCode = 500;
+    }
+    next(err);
+  }
+};
