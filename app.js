@@ -9,6 +9,7 @@ const cookieParser = require('cookie-parser');
 const shopHandler = require('./routes/shop');
 const adminHandler = require('./routes/admin');
 const authHandler = require('./routes/auth');
+const imageUploadHandler = require('./routes/upload-image');
 const { setAuthHeader } = require('./middleware/set-auth-header');
 const app = express();
 
@@ -47,6 +48,7 @@ app.use((req, res, next) => {
 app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use(setAuthHeader);
+app.use('/image', imageUploadHandler);
 app.use('/auth', authHandler);
 app.use('/shop', shopHandler);
 app.use('/admin', uploadFile, adminHandler);
