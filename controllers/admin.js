@@ -1,4 +1,5 @@
 const { validationResult } = require('express-validator');
+const { clearImage } = require('../controllers/image');
 const path = require('path');
 const fs = require('fs');
 const Product = require('../models/product');
@@ -26,40 +27,30 @@ exports.postAddProduct = async (req, res, next) => {
   }
 };
 
-const clearImage = filePath => {
-  const pathArr = filePath.split('/');
-  const localPath = path.join(
-    __dirname,
-    '..',
-    'images',
-    pathArr[pathArr.length - 1]
-  );
-  fs.unlink(localPath, err => console.log(err));
-};
+// const clearImage = filePath => {
+//   const params = {
+//     Bucket: process.env.IMAGE_UPLOAD_BUCKET_NAME,
+//     Key: key
+//   };
+// const pathArr = filePath.split('/');
+// const localPath = path.join(
+//   __dirname,
+//   '..',
+//   'images',
+//   pathArr[pathArr.length - 1]
+// );
+// fs.unlink(localPath, err => console.log(err));
+// };
 
 exports.putUpdateProduct = async (req, res, next) => {
   const errors = validationResult(req);
-
   if (!errors.isEmpty()) {
     const error = new Error('Validation failed.');
     error.statusCode = 422;
     error.data = errors.array();
     return next(error);
   }
-  const { title, description, price, _id } = req.body;
-  let imageUrl = req.body.imageUrl;
-  if (req.file) {
-    imageUrl = `${req.protocol}://${req.get('host')}/${req.file.path.replace(
-      '\\',
-      '/'
-    )}`;
-  }
-  if (!imageUrl) {
-    const error = new Error('No image provided.');
-    error.statusCode = 422;
-    return next(error);
-  }
-
+  const { title, description, price, _id, imageUrl } = req.body;
   try {
     const product = await Product.findById(_id);
     if (!product) {
@@ -67,8 +58,8 @@ exports.putUpdateProduct = async (req, res, next) => {
       error.statusCode = 404;
       return next(error);
     }
-    if (imageUrl !== req.body.imageUrl) {
-      clearImage(product.imageUrl);
+    if (imageUrl !== product.imageUrl) {
+      clearImage(product.imageUrl, next);
     }
 
     product.title = title;

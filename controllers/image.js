@@ -1,8 +1,5 @@
-const express = require('express');
 const uuid = require('uuid/v4');
 const aws = require('aws-sdk');
-const { isAuth } = require('../middleware/is-auth');
-const router = express.Router();
 
 const s3 = new aws.S3({
   accessKeyId: process.env.ACCESS_KEY_ID,
@@ -11,9 +8,9 @@ const s3 = new aws.S3({
   region: 'eu-west-2'
 });
 
-router.get('/presigned-url', isAuth, async (req, res, next) => {
+exports.getPresignedUrl = async (req, res, next) => {
   const { userId } = req;
-  const key = `${userId}/${uuid()}.jpg`;
+  const key = `${userId}/${uuid()}.jpeg`;
   const params = {
     Bucket: process.env.IMAGE_UPLOAD_BUCKET_NAME,
     Key: key,
@@ -28,6 +25,15 @@ router.get('/presigned-url', isAuth, async (req, res, next) => {
     }
     next(err);
   }
-});
+};
 
-module.exports = router;
+exports.clearImage = (filePath, next) => {
+  const params = {
+    Bucket: process.env.IMAGE_UPLOAD_BUCKET_NAME,
+    Key: filePath
+  };
+  s3.deleteObject(params, (err, data) => {
+    if (err) return next(err);
+    else console.log(`Image suggessfully deleted, ${data}`);
+  });
+};
