@@ -8,17 +8,21 @@ router.post(
   '/product',
   isAuth,
   [
-    (body('title')
+    body('title')
       .trim()
       .isLength({ min: 5 })
       .withMessage('Product title must be at least 5 chars long'),
+    body('imageUrl')
+      .trim()
+      .matches(/.jpeg/)
+      .withMessage('ImageUrl should be of jepg extension.'),
     body('description')
       .trim()
       .isLength({ min: 5 })
       .withMessage('Product description must be at least 5 chars long'),
     body('price')
       .isFloat()
-      .trim())
+      .trim()
   ],
   adminController.postAddProduct
 );

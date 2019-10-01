@@ -21,7 +21,7 @@ router.get('/presigned-url', isAuth, async (req, res, next) => {
   };
   try {
     const preSignedUrl = await s3.getSignedUrl('putObject', params);
-    res.status(200).json({ preSignedUrl });
+    res.status(200).json({ preSignedUrl, fileName: key });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
