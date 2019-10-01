@@ -27,21 +27,6 @@ exports.postAddProduct = async (req, res, next) => {
   }
 };
 
-// const clearImage = filePath => {
-//   const params = {
-//     Bucket: process.env.IMAGE_UPLOAD_BUCKET_NAME,
-//     Key: key
-//   };
-// const pathArr = filePath.split('/');
-// const localPath = path.join(
-//   __dirname,
-//   '..',
-//   'images',
-//   pathArr[pathArr.length - 1]
-// );
-// fs.unlink(localPath, err => console.log(err));
-// };
-
 exports.putUpdateProduct = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
