@@ -32,8 +32,8 @@ exports.clearImage = (filePath, next) => {
     Bucket: process.env.IMAGE_UPLOAD_BUCKET_NAME,
     Key: filePath
   };
-  s3.deleteObject(params, (err, data) => {
+  s3.deleteObject(params, err => {
     if (err) return next(err);
-    else console.log(`Image suggessfully deleted, ${data}`);
+    else console.log(`Image suggessfully deleted`);
   });
 };

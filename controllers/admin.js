@@ -89,7 +89,7 @@ exports.deleteProduct = async (req, res, next) => {
       return next(error);
     }
     res.status(200).json({ message: 'Product successfully deleted.', product });
-    clearImage(product.imageUrl);
+    clearImage(product.imageUrl, next);
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
