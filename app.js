@@ -24,7 +24,6 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
 });
-app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use(setAuthHeader);
 app.use('/image', imageHandler);
@@ -41,6 +40,10 @@ app.use((error, req, res, next) => {
 mongoose
   .connect(MONGODB_URI, { useNewUrlParser: true })
   .then(() => {
-    app.listen(process.env.PORT || 8080);
+    const server = app.listen(process.env.PORT || 8080);
+    const io = require('./utils/socket').init(server);
+    io.on('connection', socket => {
+      console.log('Client connected.');
+    });
   })
   .catch(console.log);

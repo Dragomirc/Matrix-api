@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 const { clearImage } = require('../controllers/image');
 const Product = require('../models/product');
+const io = require('../utils/socket');
 
 exports.postAddProduct = async (req, res, next) => {
   const errors = validationResult(req);
@@ -17,6 +18,10 @@ exports.postAddProduct = async (req, res, next) => {
     res
       .status(201)
       .json({ message: 'Product created successfully!', product: newProduct });
+    io.getIO().emit('product', {
+      action: 'create',
+      product: newProduct
+    });
   } catch (err) {
     if (!err.satusCode) {
       err.statusCode = 500;
@@ -54,6 +59,11 @@ exports.putUpdateProduct = async (req, res, next) => {
     res
       .status(200)
       .json({ message: 'Product updated!', product: updatedProduct });
+
+    io.getIO().emit('product', {
+      action: 'update',
+      product: updatedProduct
+    });
   } catch (err) {
     if (!err.statusCode) {
       err.satusCode = 500;
@@ -73,6 +83,11 @@ exports.deleteProduct = async (req, res, next) => {
     }
     res.status(200).json({ message: 'Product successfully deleted.', product });
     clearImage(product.imageUrl, next);
+
+    io.getIO().emit('product', {
+      action: 'delete',
+      product
+    });
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
