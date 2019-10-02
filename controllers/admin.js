@@ -1,7 +1,5 @@
 const { validationResult } = require('express-validator');
 const { clearImage } = require('../controllers/image');
-const path = require('path');
-const fs = require('fs');
 const Product = require('../models/product');
 
 exports.postAddProduct = async (req, res, next) => {
