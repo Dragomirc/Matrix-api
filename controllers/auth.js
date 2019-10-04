@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const Order = require('../models/order');
 const transport = require('../utils/send-grid');
 
 exports.signup = async (req, res, next) => {
@@ -167,12 +168,13 @@ exports.userDetails = async (req, res, next) => {
       error.statusCode = 401;
       next(error);
     }
+    const orders = await Order.find({ 'user.userId': userId }).select('-user');
     res.status(200).json({
       userId: user._id,
       userName: user.name,
       admin: user.adminRole,
       cart: user.cart.items,
-      orders: user.orders
+      orders: orders || []
     });
   } catch (error) {
     if (!error.statusCode) {
