@@ -2,8 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const path = require('path');
-const uuidv4 = require('uuid/v4');
 const cookieParser = require('cookie-parser');
 const shopHandler = require('./routes/shop');
 const adminHandler = require('./routes/admin');

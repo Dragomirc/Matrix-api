@@ -1,16 +1,9 @@
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { validationResult } = require('express-validator');
-const nodemailer = require('nodemailer');
-const sendgridTransport = require('nodemailer-sendgrid-transport');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-
-const trasnport = nodemailer.createTransport(
-  sendgridTransport({
-    auth: { api_key: process.env.SENDGRID_API_KEY }
-  })
-);
+const transport = require('../utils/send-grid');
 
 exports.signup = async (req, res, next) => {
   const errors = validationResult(req);
@@ -32,7 +25,7 @@ exports.signup = async (req, res, next) => {
       password: hash
     });
     await user.save();
-    trasnport.sendMail({
+    transport.sendMail({
       to: email,
       from: `dragomirceban@gmail.com`,
       subject: 'Signup succeeded!',
@@ -114,7 +107,7 @@ exports.postResetPassword = async (req, res, next) => {
     user.resetToken = resetToken;
     user.resetTokenExpiration = Date.now() + 1800 * 1000;
     await user.save();
-    trasnport.sendMail({
+    transport.sendMail({
       to: email,
       from: 'dragomirceban@gmail.com',
       subject: 'Password Reset',
