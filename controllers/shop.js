@@ -104,6 +104,10 @@ exports.postOrder = async (req, res, next) => {
       deliveryAddress
     });
     await order.save();
+    const orderWithPopulatedProducts = await order
+      .populate('products.productId')
+      .execPopulate();
+
     user.clearCart();
     const productsForEmail = user.cart.items.map(
       i =>
@@ -124,7 +128,7 @@ exports.postOrder = async (req, res, next) => {
     });
     res.status(200).json({
       message: 'Order placed!',
-      order: { ...order._doc, user: undefined }
+      order: { ...orderWithPopulatedProducts._doc, user: undefined }
     });
   } catch (err) {
     if (!err.statusCode) {

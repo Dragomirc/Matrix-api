@@ -161,14 +161,15 @@ exports.putUpdatePassword = async (req, res, next) => {
 exports.userDetails = async (req, res, next) => {
   const { userId } = req;
   try {
-    const user = await User.findById(userId);
-    await user.populate('cart.items.productId').execPopulate();
+    const user = await User.findById(userId).populate('cart.items.productId');
     if (!user) {
       const error = new Error("User doesn't exist.");
       error.statusCode = 401;
       next(error);
     }
-    const orders = await Order.find({ 'user.userId': userId }).select('-user');
+    const orders = await Order.find({ 'user.userId': userId })
+      .select('-user')
+      .populate('products.productId');
     res.status(200).json({
       userId: user._id,
       userName: user.name,
