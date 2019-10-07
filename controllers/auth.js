@@ -66,6 +66,10 @@ exports.login = async (req, res, next) => {
       error.statusCode = 401;
       return next(error);
     }
+    const orders = await Order.find({ 'user.userId': user.userId }).select(
+      '-user'
+    );
+
     const accessToken = jwt.sign({ userId: user._id }, process.env.SECRET, {
       expiresIn: 60 * 30
     });
@@ -85,7 +89,7 @@ exports.login = async (req, res, next) => {
         admin: user.adminRole,
 
         cart: user.cart.items,
-        orders: user.orders
+        orders: orders || []
       });
   } catch (err) {
     if (!err.statusCode) {
@@ -167,9 +171,8 @@ exports.userDetails = async (req, res, next) => {
       error.statusCode = 401;
       next(error);
     }
-    const orders = await Order.find({ 'user.userId': userId })
-      .select('-user')
-      .populate('products.productId');
+    const orders = await Order.find({ 'user.userId': userId }).select('-user');
+
     res.status(200).json({
       userId: user._id,
       userName: user.name,

@@ -94,7 +94,7 @@ exports.postOrder = async (req, res, next) => {
     const { email } = user;
     const products = user.cart.items.map(_prod => {
       total += _prod.quantity * _prod.productId.price;
-      return { productId: _prod.productId._doc, quantity: _prod.quantity };
+      return { product: _prod.productId._doc, quantity: _prod.quantity };
     });
     const order = new Order({
       user: { userId, email },
@@ -104,14 +104,11 @@ exports.postOrder = async (req, res, next) => {
       deliveryAddress
     });
     await order.save();
-    const orderWithPopulatedProducts = await order
-      .populate('products.productId')
-      .execPopulate();
 
     user.clearCart();
-    const productsForEmail = user.cart.items.map(
+    const productsForEmail = order.products.map(
       i =>
-        `<li><span>${i.quantity} x ${i.productId.title}</span> : <span>$${i.productId.price}</span></li>`
+        `<li><span>${i.quantity} x ${i.product.title}</span> : <span>$${i.product.price}</span></li>`
     );
     transport.sendMail({
       to: email,
@@ -122,13 +119,13 @@ exports.postOrder = async (req, res, next) => {
       <ul>
         ${productsForEmail}
       </ul>
-      <div>${total}</div>
+      <h4>Total price: ${total}</h4>
       <p>We'll contact you to confirm the delivery data.</p>
       `
     });
     res.status(200).json({
       message: 'Order placed!',
-      order: { ...orderWithPopulatedProducts._doc, user: undefined }
+      order: { ...order._doc, user: undefined }
     });
   } catch (err) {
     if (!err.statusCode) {
