@@ -15,10 +15,12 @@ const productSchema = new Schema({
     type: String,
     required: true
   },
-  imageUrl: {
-    type: String,
-    required: true
-  }
+  imageUrls: [
+    {
+      type: String,
+      required: true
+    }
+  ]
 });
 
 productSchema.post('findOneAndRemove', { query: true }, async function() {

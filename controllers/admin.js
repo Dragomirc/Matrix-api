@@ -11,8 +11,8 @@ exports.postAddProduct = async (req, res, next) => {
     error.data = errors.array();
     return next(error);
   }
-  const { title, price, description, imageUrl } = req.body;
-  const product = new Product({ title, imageUrl, price, description });
+  const { title, price, description, imageUrls } = req.body;
+  const product = new Product({ title, imageUrls, price, description });
   try {
     const newProduct = await product.save();
     res
@@ -38,7 +38,7 @@ exports.putUpdateProduct = async (req, res, next) => {
     error.data = errors.array();
     return next(error);
   }
-  const { title, description, price, _id, imageUrl } = req.body;
+  const { title, description, price, _id, imageUrls } = req.body;
   try {
     const product = await Product.findById(_id);
     if (!product) {
@@ -46,14 +46,14 @@ exports.putUpdateProduct = async (req, res, next) => {
       error.statusCode = 404;
       return next(error);
     }
-    if (imageUrl !== product.imageUrl) {
-      clearImage(product.imageUrl, next);
+    if (imageUrls !== product.imageUrls) {
+      clearImage(product.imageUrls, next);
     }
 
     product.title = title;
     product.description = description;
     product.price = price;
-    product.imageUrl = imageUrl;
+    product.imageUrls = imageUrls;
     const updatedProduct = await product.save();
 
     res
@@ -82,7 +82,9 @@ exports.deleteProduct = async (req, res, next) => {
       return next(error);
     }
     res.status(200).json({ message: 'Product successfully deleted.', product });
-    clearImage(product.imageUrl, next);
+    product.imageUrls.forEach(path => {
+      clearImage(path, next);
+    });
 
     io.getIO().emit('product', {
       action: 'delete',

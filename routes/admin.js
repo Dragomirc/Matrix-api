@@ -12,10 +12,10 @@ router.post(
       .trim()
       .isLength({ min: 5 })
       .withMessage('Product title must be at least 5 chars long'),
-    body('imageUrl')
-      .trim()
-      .matches(/.jpeg/)
-      .withMessage('ImageUrl should be of jepg extension.'),
+    // body('imageUrl')
+    //   .trim()
+    //   .matches(/.jpeg/)
+    //   .withMessage('ImageUrl should be of jepg extension.'),
     body('description')
       .trim()
       .isLength({ min: 5 })
