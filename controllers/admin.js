@@ -46,8 +46,11 @@ exports.putUpdateProduct = async (req, res, next) => {
       error.statusCode = 404;
       return next(error);
     }
-    if (imageUrls !== product.imageUrls) {
-      clearImage(product.imageUrls, next);
+
+    if (JSON.stringify(imageUrls) !== JSON.stringify(product.imageUrls)) {
+      product.imageUrls.forEach(path => {
+        clearImage(path, next);
+      });
     }
 
     product.title = title;
