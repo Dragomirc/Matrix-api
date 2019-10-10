@@ -1,4 +1,3 @@
-const uuid = require('uuid/v4');
 const aws = require('aws-sdk');
 
 const s3 = new aws.S3({
@@ -10,7 +9,8 @@ const s3 = new aws.S3({
 
 exports.getPresignedUrl = async (req, res, next) => {
   const { userId } = req;
-  const key = `${userId}/${uuid()}.jpeg`;
+  const { filename } = req.query;
+  const key = `${userId}/${Date.now().toString()}-${filename}.jpeg`;
   const params = {
     Bucket: process.env.IMAGE_UPLOAD_BUCKET_NAME,
     Key: key,
