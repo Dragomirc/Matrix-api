@@ -23,7 +23,7 @@
     "express-validator": "^6.1.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.6.11",
-    "nodemailer": "^6.3.0",
+    "nodemailer": "^6.4.16",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "socket.io": "^2.3.0",
     "uuid": "^3.3.3"
